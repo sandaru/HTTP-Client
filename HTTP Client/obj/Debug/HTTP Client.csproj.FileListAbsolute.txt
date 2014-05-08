@@ -1,0 +1,12 @@
+c:\users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\bin\Debug\HTTP Client.exe.config
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\bin\Debug\HTTP Client.exe
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\bin\Debug\HTTP Client.pdb
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\bin\Debug\LumiSoft.Net.dll
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\bin\Debug\LumiSoft.Net.pdb
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\bin\Debug\LumiSoft.Net.xml
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\obj\Debug\HTTP Client.csprojResolveAssemblyReference.cache
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\obj\Debug\HTTP_Client.Form1.resources
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\obj\Debug\HTTP_Client.Properties.Resources.resources
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\obj\Debug\HTTP Client.csproj.GenerateResource.Cache
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\obj\Debug\HTTP Client.exe
+C:\Users\pusalk\documents\visual studio 2012\Projects\HTTP Client\HTTP Client\obj\Debug\HTTP Client.pdb
