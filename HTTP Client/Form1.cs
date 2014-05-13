@@ -1,8 +1,4 @@
-﻿/*TODO:
- * Implement a verifying technique for client applications which can veryfy otherized client applications.
- * dynamic MD5 UID code canbe used
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,6 +21,7 @@ namespace HTTP_Client
     {
         //Coppy of text field data
         private string[] data = null;
+        private string application_id = null;
         public Form1()
         {
             InitializeComponent();
@@ -32,8 +29,7 @@ namespace HTTP_Client
 
         private void button1_Click(object sender, EventArgs e)
         {
-            UIDMatch();
-            //getResponse();
+             getResponse();
         }
 
         /// <summary>
@@ -106,15 +102,14 @@ namespace HTTP_Client
             {
                 using (var client = new WebClient())
                 {
-                    try
-                    {
-                        var response = client.DownloadString("http://localhost:8787/");
-                        richTextBoxRespose.Text += response + Environment.NewLine;
-                    }
-                    catch (ArgumentException)//if url is empty
-                    {
-                        MessageBox.Show("Download String is null or wrong");
-                    }
+
+                    var values = new NameValueCollection();
+                    values["uid"] = application_id;
+
+                    var response = Encoding.ASCII.GetString(client.UploadValues
+                           ("http://localhost/TestAPP/server.php", "POST", values));
+                    richTextBoxRespose.Text += response + Environment.NewLine;
+
                 }
             }
             catch (Exception)
@@ -126,8 +121,16 @@ namespace HTTP_Client
 
         private void Form1_Load(object sender, EventArgs e)
         {
-           sendRequest(null);
-           applicationOn();
+            if (UIDMatch())
+            {
+                sendRequest(null);
+                applicationOn();
+            }
+            else
+            {
+                MessageBox.Show("Register your application now");
+                Application.Exit();
+            }
         }
 
 
@@ -144,7 +147,8 @@ namespace HTTP_Client
                     var values = new NameValueCollection();
                     values["port"] = data[1];
                     values["ip"] = data[2];
-                    values["comName"] = System.Environment.MachineName;;
+                    values["comName"] = System.Environment.MachineName;
+                    values["uid"] = application_id;
 
 
                     var ret = client.UploadValues("http://localhost/TestAPP/index.php","POST",values);
@@ -181,9 +185,10 @@ namespace HTTP_Client
                         {
                             var values = new NameValueCollection();
                             values["uid"] = line;
+                            application_id = line;//Assign the application id gloabally 
                             var ret = client.UploadValues("http://localhost/TestAPP/authenticate.php", "POST", values);
                             MessageBox.Show(Encoding.ASCII.GetString(ret));
-                            if (Encoding.ASCII.GetString(ret) == "true")
+                            if (Encoding.ASCII.GetString(ret)=="true")
                             {
                                 match=true;
                             }
@@ -202,6 +207,7 @@ namespace HTTP_Client
                 File.Create(filename+".uid").Dispose();
                 String dataToEncript = data[0] + ":" + data[1] + data[2];
                 File.WriteAllText((filename + ".uid"), MD5Hash(dataToEncript));
+                application_id = MD5Hash(dataToEncript);//Assign the application id gloabally 
                 using (var client = new WebClient())
                 {
                     var values = new NameValueCollection();
