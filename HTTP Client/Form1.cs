@@ -29,6 +29,7 @@ namespace HTTP_Client
 
         private void button1_Click(object sender, EventArgs e)
         {
+             connectedDeviceDetails();
              getResponse();
         }
 
@@ -218,6 +219,27 @@ namespace HTTP_Client
                 MessageBox.Show("Registered");
                 return true;
             }
+        }
+
+        /// <summary>
+        /// This method returns array of device details that are paired with the client device
+        /// data represent as 2x2 array
+        /// Eg. [[ip,port],[ip,port]...]
+        /// </summary>
+        /// <returns></returns>
+        public List<string[]> connectedDeviceDetails()
+        {
+            List<string[]> connectedDevices = new List<string[]>();
+            using (var client = new WebClient())
+            {
+                var values = new NameValueCollection();
+                values["uid"] = application_id;
+                var ret = client.UploadValues("http://localhost/TestAPP/exchange.php", "POST", values);
+                string[] details = Encoding.ASCII.GetString(ret).Split(':');
+                connectedDevices.Add(details);
+                MessageBox.Show(Encoding.ASCII.GetString(ret));
+            }
+            return connectedDevices;
         }
 
 
