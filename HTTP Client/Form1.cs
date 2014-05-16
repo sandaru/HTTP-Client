@@ -19,26 +19,46 @@ namespace HTTP_Client
 {
     public partial class Form1 : Form
     {
-        //Coppy of text field data
+        //Copy of text field data
         private string[] data = null;
         private string application_id = null;
         public Form1()
         {
             InitializeComponent();
         }
+        /// <summary>
+        /// When form load
+        /// Authenticate the application using UID
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            if (UIDMatch())//If application is registered and authorized
+            {
+                setDisplayValues(null);
+                applicationOn();
+            }
+            else//If not secure
+            {
+                MessageBox.Show("Register your application now");
+                Application.Exit();
+            }
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
              connectedDeviceDetails();
-             getResponse();
+             getConnectedDeviceState();
         }
 
         /// <summary>
         /// iterative method to get response
-        /// this is listning for the server state related to the client
+        /// this is listening for the server state related to the client
         /// </summary>
         /// <param name="value"></param>
-        public void getResponse()
+        public void getConnectedDeviceState()
         {
             timer1.Start();
         }
@@ -48,11 +68,11 @@ namespace HTTP_Client
         /// Run when application is loading.
         /// </summary>
         /// <param name="value"></param>
-        public void sendRequest(string value)
+        public void setDisplayValues(string value)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<string> (sendRequest), new object[] {value});
+                this.Invoke(new Action<string>(setDisplayValues), new object[] { value });
                 return;
             }
             String[] stundata = getStundata();
@@ -67,7 +87,7 @@ namespace HTTP_Client
         /// <summary>
         /// Connect to a stun server to get the public IP and PORT
         /// Call stun server ("stunserver.org")
-        /// !!!Dont change the port of outgoing request(3478)
+        /// !!!Don't change the port of outgoing request(3478)
         /// </summary>
         /// <returns></returns>
         private string[] getStundata()
@@ -91,8 +111,8 @@ namespace HTTP_Client
         }
  
         /// <summary>
-        /// Time thread to request availability states
-        /// run onece a two seconds
+        /// Time thread to request availability states of connected devices
+        /// run once for two seconds
         /// can change the HTTP destination by replacing the URL
         /// </summary>
         /// <param name="sender"></param>
@@ -108,8 +128,8 @@ namespace HTTP_Client
                     values["uid"] = application_id;
 
                     var response = Encoding.ASCII.GetString(client.UploadValues
-                           ("http://localhost/TestAPP/server.php", "POST", values));
-                    richTextBoxRespose.Text += response + Environment.NewLine;
+                           ("http://sandarurdp.net76.net/server.php", "POST", values));
+                    richTextBoxRespose.Text = response;
 
                 }
             }
@@ -120,24 +140,9 @@ namespace HTTP_Client
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            if (UIDMatch())
-            {
-                sendRequest(null);
-                applicationOn();
-            }
-            else
-            {
-                MessageBox.Show("Register your application now");
-                Application.Exit();
-            }
-        }
-
-
         /// <summary>
         /// Send Port data via HTTP
-        /// can change the http destination by replacing the URL
+        /// can change the HTTP destination by replacing the URL
         /// </summary>
         private void applicationOn()
         {
@@ -152,7 +157,7 @@ namespace HTTP_Client
                     values["uid"] = application_id;
 
 
-                    var ret = client.UploadValues("http://localhost/TestAPP/index.php","POST",values);
+                    var ret = client.UploadValues("http://sandarurdp.net76.net/appOn.php", "POST", values);
                     MessageBox.Show(Encoding.ASCII.GetString(ret));
                 }
             }
@@ -162,10 +167,9 @@ namespace HTTP_Client
             }
         }
 
-
         /// <summary>
         /// Verify the application
-        /// uses MD5 Encription algorithm to verify the application
+        /// uses MD5 Encryption algorithm to verify the application
         /// </summary>
         /// <returns></returns>
         private bool UIDMatch()
@@ -187,7 +191,7 @@ namespace HTTP_Client
                             var values = new NameValueCollection();
                             values["uid"] = line;
                             application_id = line;//Assign the application id gloabally 
-                            var ret = client.UploadValues("http://localhost/TestAPP/authenticate.php", "POST", values);
+                            var ret = client.UploadValues("http://sandarurdp.net76.net/authenticate.php", "POST", values);
                             MessageBox.Show(Encoding.ASCII.GetString(ret));
                             if (Encoding.ASCII.GetString(ret)=="true")
                             {
@@ -234,14 +238,13 @@ namespace HTTP_Client
             {
                 var values = new NameValueCollection();
                 values["uid"] = application_id;
-                var ret = client.UploadValues("http://localhost/TestAPP/exchange.php", "POST", values);
+                var ret = client.UploadValues("http://sandarurdp.net76.net/exchange.php", "POST", values);
                 string[] details = Encoding.ASCII.GetString(ret).Split(':');
                 connectedDevices.Add(details);
                 MessageBox.Show(Encoding.ASCII.GetString(ret));
             }
             return connectedDevices;
         }
-
 
         /// <summary>
         /// Encrypt given text using MD5 algorithm
@@ -263,6 +266,21 @@ namespace HTTP_Client
                 strBuilder.Append(result[i].ToString("x2"));
             }
             return strBuilder.ToString();
+        }
+        
+        /// <summary>
+        /// Change the application state when form is closed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            using (var client = new WebClient())
+            {
+                var values = new NameValueCollection();
+                values["uid"] = application_id;
+                client.UploadValues("http://sandarurdp.net76.net/exchange.php", "POST", values);
+            }
         }
 
     }
