@@ -14,7 +14,7 @@ using System.Net.Sockets;
 using System.Collections.Specialized;
 using System.IO;
 using System.Security.Cryptography;
-
+using System.Text.RegularExpressions;
 namespace HTTP_Client
 {
     public partial class Form1 : Form
@@ -35,15 +35,22 @@ namespace HTTP_Client
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (UIDMatch())//If application is registered and authorized
+            //if (UIDMatch())//If application is registered and authorized
+            //{
+            //}
+            //else//If not secure
+            //{
+            //    MessageBox.Show("Register your application now");
+            //    Application.Exit();
+            //}
+            setDisplayValues(null);
+            if (UIDMatch())
             {
-                setDisplayValues(null);
                 applicationOn();
             }
-            else//If not secure
+            else
             {
-                MessageBox.Show("Register your application now");
-                Application.Exit();
+                MessageBox.Show("Application invalid");
             }
         }
 
@@ -81,7 +88,6 @@ namespace HTTP_Client
             textPublicIP.Text = stundata[2];//Public IP
             textMachineName.Text = System.Environment.MachineName;//Computer name
             textDataString.Text = stundata[0] + ":" + stundata[1] + ":" + stundata[2] + ":" + System.Environment.MachineName;
-            data = stundata;
         }
 
         /// <summary>
@@ -107,6 +113,7 @@ namespace HTTP_Client
             {
                 MessageBox.Show("Error Public IP");
             }
+            data = stundata;
             return stundata;
         }
  
@@ -129,7 +136,11 @@ namespace HTTP_Client
 
                     var response = Encoding.ASCII.GetString(client.UploadValues
                            ("http://sandarurdp.net76.net/server.php", "POST", values));
-                    richTextBoxRespose.Text = response;
+                    //var response = Encoding.ASCII.GetString(client.UploadValues
+                    //       ("http://localhost/TestAPP/server.php", "POST", values));
+
+                    var returnText = new Regex("<t>(.*?)</t>", RegexOptions.IgnoreCase | RegexOptions.Singleline).Match(response).Groups[1].Value;
+                    richTextBoxRespose.Text = returnText;
 
                 }
             }
@@ -158,6 +169,7 @@ namespace HTTP_Client
 
 
                     var ret = client.UploadValues("http://sandarurdp.net76.net/appOn.php", "POST", values);
+                    //var ret = client.UploadValues("http://localhost/TestAPP/appOn.php", "POST", values);
                     MessageBox.Show(Encoding.ASCII.GetString(ret));
                 }
             }
@@ -189,11 +201,15 @@ namespace HTTP_Client
                         using (var client= new WebClient())
                         {
                             var values = new NameValueCollection();
+                            MessageBox.Show(line);
                             values["uid"] = line;
-                            application_id = line;//Assign the application id gloabally 
+                            application_id = line;//Assign the application id globally 
+
                             var ret = client.UploadValues("http://sandarurdp.net76.net/authenticate.php", "POST", values);
-                            MessageBox.Show(Encoding.ASCII.GetString(ret));
-                            if (Encoding.ASCII.GetString(ret)=="true")
+                            //var ret = client.UploadValues("http://localhost/TestAPP/authenticate.php", "POST", values);
+                            var returnText = new Regex("<t>(.*?)</t>", RegexOptions.IgnoreCase | RegexOptions.Singleline).Match(Encoding.ASCII.GetString(ret)).Groups[1].Value;
+                            MessageBox.Show("return : "+returnText);
+                            if (returnText == "true")
                             {
                                 match=true;
                             }
@@ -212,12 +228,13 @@ namespace HTTP_Client
                 File.Create(filename+".uid").Dispose();
                 String dataToEncript = data[0] + ":" + data[1] + data[2];
                 File.WriteAllText((filename + ".uid"), MD5Hash(dataToEncript));
-                application_id = MD5Hash(dataToEncript);//Assign the application id gloabally 
+                application_id = MD5Hash(dataToEncript);//Assign the application id globally 
                 using (var client = new WebClient())
                 {
                     var values = new NameValueCollection();
                     values["uid"] = dataToEncript;
-                    var ret = client.UploadValues("http://localhost/TestAPP/insertNewID.php", "POST", values);
+                    var ret = client.UploadValues("http://sandarurdp.net76.net/insertNewID.php", "POST", values);
+                    //var ret = client.UploadValues("http://localhost/TestAPP/insertNewID.php", "POST", values);
                     MessageBox.Show(Encoding.ASCII.GetString(ret));
                 }
                 MessageBox.Show("Registered");
@@ -239,9 +256,10 @@ namespace HTTP_Client
                 var values = new NameValueCollection();
                 values["uid"] = application_id;
                 var ret = client.UploadValues("http://sandarurdp.net76.net/exchange.php", "POST", values);
-                string[] details = Encoding.ASCII.GetString(ret).Split(':');
+                //var ret = client.UploadValues("http://localhost/TestAPP/exchange.php", "POST", values);
+                var returnText = new Regex("<t>(.*?)</t>", RegexOptions.IgnoreCase | RegexOptions.Singleline).Match(Encoding.ASCII.GetString(ret)).Groups[1].Value;
+                string[] details = returnText.Split(':');
                 connectedDevices.Add(details);
-                MessageBox.Show(Encoding.ASCII.GetString(ret));
             }
             return connectedDevices;
         }
@@ -280,6 +298,7 @@ namespace HTTP_Client
                 var values = new NameValueCollection();
                 values["uid"] = application_id;
                 client.UploadValues("http://sandarurdp.net76.net/exchange.php", "POST", values);
+                //client.UploadValues("http://localhost/TestAPP/exchange.php", "POST", values);
             }
         }
 
